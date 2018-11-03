@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UICollectionViewController {
+class ViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
     
     private var sections = [
         
@@ -35,6 +35,26 @@ class ViewController: UICollectionViewController {
         contentInset.top = 20
         collectionView!.contentInset = contentInset
         // Do any additional setup after loading the view, typically from a nib.
+        
+        let layout = collectionView!.collectionViewLayout
+        let flow = layout as! UICollectionViewFlowLayout
+        flow.sectionInset = UIEdgeInsets(top: 10, left: 20, bottom: 30, right: 20)
+        
+        self.collectionView?.register(HeaderCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HEADER")
+        
+        flow.headerReferenceSize = CGSize(width: 100, height: 25)
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind:
+        String, at indexPath: IndexPath) -> UICollectionReusableView {
+        if (kind == UICollectionView.elementKindSectionHeader) {
+            let cell = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HEADER"
+                , for: indexPath) as! HeaderCell
+            cell.maxWidth = collectionView.bounds.size.width
+            cell.text = sections[indexPath.section]["header"]
+            return cell
+        }
+        abort()
     }
     
     func wordsInSection(section: Int) -> [String] {
@@ -42,6 +62,14 @@ class ViewController: UICollectionViewController {
         let spaces = NSCharacterSet.whitespacesAndNewlines
         let words = content?.components(separatedBy: spaces)
         return words!
+    }
+    
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+        let words = wordsInSection(section: indexPath.section)
+        let size = ContentCell.sizeForContentString(s: words[indexPath.row],
+                                                    forMaxWidth: collectionView.bounds.size.width)
+        return size
     }
     
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
